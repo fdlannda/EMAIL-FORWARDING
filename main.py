@@ -7,13 +7,13 @@ from bs4 import BeautifulSoup  # Untuk mengubah HTML menjadi teks biasa
 import telebot
 
 # Konfigurasi Telegram Bot
-BOT_TOKEN = '7923488260:AAEn5U_3iXb7j_jhu6vnIjfLHicUMvl-7sw'  # Masukkan token bot Anda
-CHAT_ID = '5638861236'  # Masukkan Chat ID Anda
+BOT_TOKEN = ''  # Masukkan token bot Anda
+CHAT_ID = ''  # Masukkan Chat ID Anda
 bot = telebot.TeleBot(BOT_TOKEN)
 
 # Konfigurasi Email
-EMAIL = 'anandaforwarding@gmail.com'  # Masukkan email Anda
-PASSWORD = 'qzip lvus elkd rlbt'  # Gunakan App Password untuk keamanan
+EMAIL = ''  # Masukkan email Anda
+PASSWORD = ''  # Gunakan App Password untuk keamanan
 IMAP_SERVER = 'imap.gmail.com'  # Ganti dengan server IMAP penyedia email Anda
 CHECK_INTERVAL = 1  # Waktu jeda antar pengecekan (dalam detik)
 
