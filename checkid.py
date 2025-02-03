@@ -1,13 +1,13 @@
 import requests
 
-# Masukkan bot token Anda
-BOT_TOKEN = "7923488260:AAEn5U_3iXb7j_jhu6vnIjfLHicUMvl-7sw"
+# Enter your Telegram bot token
+BOT_TOKEN = ""
 
 # API URL
 url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
 
-# Kirim permintaan untuk mendapatkan pembaruan
+# Send request to get updates
 response = requests.get(url)
 
-# Cetak respon
+# Print response
 print(response.json())
