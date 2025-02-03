@@ -3,46 +3,46 @@ import time
 import imaplib
 import email
 from email.header import decode_header
-from bs4 import BeautifulSoup  # Untuk mengubah HTML menjadi teks biasa
+from bs4 import BeautifulSoup  # To convert HTML to plain text
 import telebot
 
-# Konfigurasi Telegram Bot
-BOT_TOKEN = ''  # Masukkan token bot Anda
-CHAT_ID = ''  # Masukkan Chat ID Anda
+# Telegram Bot Configuration
+BOT_TOKEN = ''  # Enter your bot token
+CHAT_ID = ''  # Enter your Chat ID
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# Konfigurasi Email
-EMAIL = ''  # Masukkan email Anda
-PASSWORD = ''  # Gunakan App Password untuk keamanan
-IMAP_SERVER = 'imap.gmail.com'  # Ganti dengan server IMAP penyedia email Anda
-CHECK_INTERVAL = 1  # Waktu jeda antar pengecekan (dalam detik)
+# Email Configuration
+EMAIL = ''  # Enter your email
+PASSWORD = ''  # Use an App Password for security
+IMAP_SERVER = 'imap.gmail.com'  # Change to your email provider's IMAP server
+CHECK_INTERVAL = 1  # Interval between checks (in seconds)
 
-# Folder untuk menyimpan lampiran
+# Folder to store attachments
 ATTACHMENT_FOLDER = "attachments"
 if not os.path.exists(ATTACHMENT_FOLDER):
     os.makedirs(ATTACHMENT_FOLDER)
 
 def clean_text(text):
-    """Membersihkan teks dari karakter yang tidak valid."""
+    """Cleans text by removing invalid characters."""
     return ''.join(c if c.isalnum() else '_' for c in text)
 
 def format_body_for_telegram(body):
-    """Memformat isi pesan agar angka/kode mudah di-copy."""
+    """Formats the message body so numbers/codes are easy to copy."""
     formatted_body = "\n".join(
-        f"`{line.strip()}`" if line.strip().isdigit() else line
+        f"{line.strip()}" if line.strip().isdigit() else line
         for line in body.splitlines()
     )
     return formatted_body
 
 def get_email_body(msg):
-    """Mengambil isi pesan email, baik teks biasa maupun HTML."""
+    """Extracts the email body, handling both plain text and HTML."""
     body = ""
     if msg.is_multipart():
         for part in msg.walk():
             content_type = part.get_content_type()
             content_disposition = str(part.get("Content-Disposition"))
 
-            # Ambil teks email (prioritas text/plain, jika tidak ada gunakan text/html)
+            # Extract email text (prioritizing text/plain, fallback to text/html)
             if content_type == "text/plain" and "attachment" not in content_disposition:
                 body = part.get_payload(decode=True).decode(errors='ignore')
             elif content_type == "text/html" and not body:
@@ -57,7 +57,7 @@ def fetch_and_send_emails():
     try:
         mail = imaplib.IMAP4_SSL(IMAP_SERVER)
         mail.login(EMAIL, PASSWORD)
-        mail.select("inbox")  # Pilih folder inbox
+        mail.select("inbox")  # Select the inbox folder
 
         status, messages = mail.search(None, 'UNSEEN')
         email_ids = messages[0].split()
@@ -76,18 +76,18 @@ def fetch_and_send_emails():
                     from_ = msg.get("From")
                     to_ = msg.get("To")
                     
-                    email_message = f"📧 *Email Baru*\n\n*Dari:* {from_}\n*Kepada:* {to_}\n*Subjek:* {subject}\n\n"
+                    email_message = f"\U0001F4E7 *New Email*\n\n*From:* {from_}\n*To:* {to_}\n*Subject:* {subject}\n\n"
 
-                    # Mendapatkan isi email
+                    # Extract email content
                     body = get_email_body(msg)
                     if body:
                         formatted_body = format_body_for_telegram(body)
-                        email_message += f"*Isi Pesan:*\n{formatted_body}\n\n"
+                        email_message += f"*Message Content:*\n{formatted_body}\n\n"
 
-                    # Kirim pesan ke Telegram
+                    # Send message to Telegram
                     bot.send_message(CHAT_ID, email_message, parse_mode="Markdown")
 
-                    # Proses lampiran jika ada
+                    # Process attachments if any
                     for part in msg.walk():
                         content_disposition = str(part.get("Content-Disposition"))
                         if "attachment" in content_disposition:
@@ -98,24 +98,24 @@ def fetch_and_send_emails():
                                 with open(filepath, "wb") as f:
                                     f.write(part.get_payload(decode=True))
                                 
-                                # Kirim lampiran ke Telegram
+                                # Send attachment to Telegram
                                 with open(filepath, "rb") as f:
                                     bot.send_document(
                                         CHAT_ID, 
                                         f, 
-                                        caption=f"📎 *Lampiran: {filename}*\n\n(Dari: {from_} Kepada: {to_})"
+                                        caption=f"\U0001F4CE *Attachment: {filename}*\n\n(From: {from_} To: {to_})"
                                     )
 
         mail.logout()
 
     except Exception as e:
-        print(f"Terjadi error: {e}")
+        print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
-    print("Bot sedang berjalan. Menunggu email baru...")
+    print("Bot is running. Waiting for new emails...")
     while True:
         try:
             fetch_and_send_emails()
         except Exception as e:
-            print(f"Error utama: {e}")
+            print(f"Main error: {e}")
         time.sleep(CHECK_INTERVAL)
