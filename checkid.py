@@ -1,7 +1,7 @@
 import requests
 
 # Enter your Telegram bot token
-BOT_TOKEN = ""
+BOT_TOKEN = "..."
 
 # API URL
 url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
